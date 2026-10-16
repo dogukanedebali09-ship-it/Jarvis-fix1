@@ -1,0 +1,36 @@
+name: Android APK
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Projeyi hazirla ve derle
+        run: |
+          if [ -f settings.gradle.kts ]; then
+            DIR=.
+          else
+            unzip -o jarvis-android.zip
+            DIR=jarvis-android
+          fi
+          cd "$DIR"
+          gradle assembleDebug --no-daemon --stacktrace
+          echo "APK_DIR=$PWD" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: JARVIS-apk
+          path: ${{ env.APK_DIR }}/app/build/outputs/apk/debug/app-debug.apk
