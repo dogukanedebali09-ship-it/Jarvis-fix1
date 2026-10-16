@@ -18,13 +18,15 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Projeyi hazirla ve derle
+      - - name: Projeyi hazirla ve derle
         run: |
+          mkdir -p _x
           if [ ! -f settings.gradle.kts ]; then
-            for i in 1 2; do
-              find . -name '*.zip' -print0 | while IFS= read -r -d '' z; do
-                unzip -oq "$z" -d "_x/$(basename "$z" .zip)" || true
-              done
+            n=0
+            find . -name '*.zip' -not -path './_x/*' -print0 | while IFS= read -r -d '' z; do
+              n=$((n+1))
+              mkdir -p "_x/$n"
+              unzip -oq "$z" -d "_x/$n" || true
             done
           fi
           S=$(find . -name settings.gradle.kts | head -n1)
